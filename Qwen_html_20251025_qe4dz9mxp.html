@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anis & Buglem — Friendship Timer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: #000;
+      color: #f5f5f5;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(30, 30, 30, 0.7) 0%, rgba(0, 0, 0, 1) 100%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.2rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      color: #d4af37;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      font-weight: 300;
+      color: #ccc;
+      max-width: 600px;
+      line-height: 1.5;
+    }
+
+    .timer-grid {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin: 2.5rem 0;
+    }
+
+    .time-box {
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 1.2rem 0.9rem;
+      min-width: 90px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(212, 175, 55, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .time-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3), inset 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+
+    .time-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .time-label {
+      font-size: 0.85rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 0.3rem;
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 60px;
+      text-align: center;
+    }
+
+    .set-date-btn {
+      padding: 14px 40px;
+      background: transparent;
+      color: #d4af37;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .set-date-btn:hover {
+      border-color: #d4af37;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+    }
+
+    .detail-section {
+      text-align: center;
+    }
+
+    .detail-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 6rem;
+      font-weight: 700;
+      color: #d4af37;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-label {
+      font-size: 1.2rem;
+      font-weight: 300;
+      color: #ccc;
+      max-width: 600px;
+      line-height: 1.5;
+    }
+
+    .nav-button {
+      width: 60px;
+      height: 60px;
+      background: transparent;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #d4af37;
+      margin-top: 2.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-button:hover {
+      border-color: #d4af37;
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+      transform: translateY(-3px);
+    }
+
+    .chat-section {
+      text-align: center;
+    }
+
+    .chat-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: #d4af37;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+      font-weight: 700;
+    }
+
+    .chat-container {
+      max-width: 500px;
+      width: 90%;
+      padding: 1.5rem;
+    }
+
+    .chat-message {
+      margin-bottom: 15px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chat-message.received { text-align: left; }
+    .chat-message.sent { text-align: right; }
+
+    .message-content {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 18px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      max-width: 80%;
+      color: #f5f5f5;
+      line-height: 1.4;
+    }
+
+    .chat-message.received .message-content {
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .chat-message.sent .message-content {
+      background: rgba(212, 175, 55, 0.25);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .message-time {
+      font-size: 0.85rem;
+      color: rgba(212, 175, 55, 0.6);
+      margin-top: 5px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .chat-message.received .message-time { text-align: left; }
+    .chat-message.sent .message-time { text-align: right; }
+
+    .signature {
+      margin-top: 3rem;
+      font-size: 1.1rem;
+      color: #888;
+      font-style: italic;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    /* Footer style */
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem 2.5rem;
+      font-size: 0.95rem;
+      color: #666;
+      font-family: 'Montserrat', sans-serif;
+      width: 100%;
+      border-top: 1px solid rgba(212, 175, 55, 0.06);
+      margin-top: 2rem;
+    }
+
+    .footer a {
+      color: #d4af37;
+      text-decoration: none;
+      margin: 0 0.4rem;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .footer .love {
+      color: #d4af37;
+      display: block;
+      margin-top: 0.5rem;
+      font-weight: 400;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 { font-size: 2.4rem; }
+      .subtitle { font-size: 1.1rem; }
+      .detail-value { font-size: 4rem; }
+      .time-value { font-size: 2rem; }
+      .time-box { min-width: 75px; padding: 1rem 0.6rem; }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 { font-size: 2rem; }
+      .detail-value { font-size: 3rem; }
+      .time-value { font-size: 1.7rem; }
+      .time-box { min-width: 65px; padding: 0.9rem 0.5rem; }
+      .footer { padding: 1.8rem 1rem 2rem; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="section main-section">
+    <div class="header">
+      <h1>ANIS & BUGLEM</h1>
+      <p class="subtitle">Since our first meeting on December 1, 2024 at 10:18 PM</p>
+    </div>
+
+    <div class="timer-grid">
+      <div class="time-box">
+        <div class="time-value" id="days">00</div>
+        <div class="time-label">Days</div>
+      </div>
+      <div class="time-box">
+        <div class="time-value" id="hours">00</div>
+        <div class="time-label">Hours</div>
+      </div>
+      <div class="time-box">
+        <div class="time-value" id="minutes">00</div>
+        <div class="time-label">Minutes</div>
+      </div>
+      <div class="time-box">
+        <div class="time-value" id="seconds">00</div>
+        <div class="time-label">Seconds</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="set-date-btn" onclick="scrollToSection('months-section')">See More</button>
+    </div>
+  </div>
+
+  <div class="section detail-section" id="months-section">
+    <div class="detail-value" id="months-detail">0</div>
+    <div class="detail-label">months since we've known each other</div>
+    <button class="nav-button" onclick="scrollToSection('weeks-section')">→</button>
+  </div>
+
+  <div class="section detail-section" id="weeks-section">
+    <div class="detail-value" id="weeks-detail">0</div>
+    <div class="detail-label">weeks since we've known each other</div>
+    <button class="nav-button" onclick="scrollToSection('days2-section')">→</button>
+  </div>
+
+  <div class="section detail-section" id="days2-section">
+    <div class="detail-value" id="days-detail">0</div>
+    <div class="detail-label">days since we've known each other</div>
+    <button class="nav-button" onclick="scrollToSection('hours-section')">→</button>
+  </div>
+
+  <div class="section detail-section" id="hours-section">
+    <div class="detail-value" id="hours-detail">0</div>
+    <div class="detail-label">hours since we've known each other</div>
+    <button class="nav-button" onclick="scrollToSection('minutes-section')">→</button>
+  </div>
+
+  <div class="section detail-section" id="minutes-section">
+    <div class="detail-value" id="minutes-detail">0</div>
+    <div class="detail-label">minutes since we've known each other</div>
+    <button class="nav-button" onclick="scrollToSection('seconds-section')">→</button>
+  </div>
+
+  <div class="section detail-section" id="seconds-section">
+    <div class="detail-value" id="seconds-detail">0</div>
+    <div class="detail-label">seconds since we've known each other</div>
+    <button class="nav-button" onclick="scrollToSection('chat-section')">→</button>
+  </div>
+
+  <div class="section chat-section" id="chat-section">
+    <h2 class="chat-title">Our First Messages</h2>
+    <div class="chat-container">
+      <div class="chat-message received">
+        <div class="message-content">Hey babeee I'm your buggieee</div>
+        <div class="message-time">12/01/2024, 10:18 PM</div>
+      </div>
+      <div class="chat-message sent">
+        <div class="message-content">Hiiiiii</div>
+        <div class="message-time">12/01/2024, 10:19 PM</div>
+      </div>
+    </div>
+    <p class="signature">Every second counts.</p>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>Phone: <a href="tel:+213559621299">+213 559 621 299</a> • Instagram: <a href="https://instagram.com/mpnxa" target="_blank">@mpnxa</a></div>
+    <span class="love">All love from Anis 💛</span>
+  </div>
+
+  <script>
+    const startDate = new Date(2024, 11, 1, 22, 18, 0); // Dec 1, 2024 at 10:18 PM (local time)
+
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateTimer() {
+      const now = new Date();
+      const diff = now - startDate;
+
+      if (diff < 0) {
+        document.getElementById('days').textContent = '00';
+        document.getElementById('hours').textContent = '00';
+        document.getElementById('minutes').textContent = '00';
+        document.getElementById('seconds').textContent = '00';
+        document.getElementById('days-detail').textContent = '0';
+        document.getElementById('weeks-detail').textContent = '0';
+        document.getElementById('months-detail').textContent = '0';
+        document.getElementById('hours-detail').textContent = '0';
+        document.getElementById('minutes-detail').textContent = '0';
+        document.getElementById('seconds-detail').textContent = '0';
+        return;
+      }
+
+      const totalSeconds = Math.floor(diff / 1000);
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const totalHours = Math.floor(totalMinutes / 60);
+      const totalDays = Math.floor(totalHours / 24);
+      const totalWeeks = Math.floor(totalDays / 7);
+      const totalMonths = Math.floor(totalDays / 30.44);
+
+      const displayDays = totalDays;
+      const displayHours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const displayMinutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const displaySeconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById('days').textContent = String(displayDays).padStart(2, '0');
+      document.getElementById('hours').textContent = String(displayHours).padStart(2, '0');
+      document.getElementById('minutes').textContent = String(displayMinutes).padStart(2, '0');
+      document.getElementById('seconds').textContent = String(displaySeconds).padStart(2, '0');
+
+      document.getElementById('days-detail').textContent = displayDays.toLocaleString();
+      document.getElementById('weeks-detail').textContent = totalWeeks.toLocaleString();
+      document.getElementById('months-detail').textContent = totalMonths.toLocaleString();
+      document.getElementById('hours-detail').textContent = totalHours.toLocaleString();
+      document.getElementById('minutes-detail').textContent = totalMinutes.toLocaleString();
+      document.getElementById('seconds-detail').textContent = totalSeconds.toLocaleString();
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  </script>
+</body>
+</html>
